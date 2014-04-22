@@ -47,17 +47,18 @@
 
             init:function(){
 
-                this.$pages = this.$el.children();      //所有页面zepto对象
-                this.length = this.$pages.length -1;       //页面个数
-                this.height = this.$el.height();        //容器高度
-                this.curIndex = 0;                      //当前展示页面
-                this.newIndex = 0;                      //需要切换到下一页的索引
-                this.startTime = null;                  //开始时间
-                this.drag = null;                       //是否处于拖动状态
-                this.startY = null;                   //touch start的值
-                this.direction = null;                 //拖动的方向
-                this.directionLocked = null;                    //方向初始化控制值
-                this.$target = null;                    //确定拖动的目标
+                this.$pages             = this.$el.children();              //所有页面zepto对象
+                this.length             = this.$pages.length -1;            //页面个数
+                this.width              = this.$el.width();
+                this.height             = this.$el.height();                //容器高度
+                this.curIndex           = 0;                                //当前展示页面
+                this.newIndex           = 0;                                //需要切换到下一页的索引
+                this.startTime          = null;                             //开始时间
+                this.drag               = null;                             //是否处于拖动状态
+                this.startY             = null;                             //touch start的值
+                this.direction          = null;                             //拖动的方向
+                this.directionLocked    = null;                             //方向初始化控制值
+                this.$target            = null;                             //确定拖动的目标
 
                 this._initEvent();
                 console.log('init');
@@ -103,6 +104,7 @@
                 var point = hasTouch ? e.touches[0] : e;
                 this.startTime = Date.now();
                 this.drag      = true;
+                this.startX    = point.pageX;
                 this.startY    = point.pageY;       //start Y
             },
 
@@ -118,52 +120,92 @@
                 if(this.moved || !this.drag) return;
 
                 var point       = hasTouch ? e.touches[0] : e,
+                    deltaX      = point.pageX - this.startX,
                     deltaY      = point.pageY - this.startY;
-
+                //绝对值
+                this.absDistX   = Math.abs(deltaX);
                 this.absDistY   = Math.abs(deltaY);
+                //10px用于方向性预测
+                if(this.absDistX < 10 && this.absDistY < 10 ) return;
 
-                if(this.absDistY < 5 ) return;
                 //第一次移动则锁住 仅执行一次
-//                debugger
                 if(!this.directionLocked){
-                    this.directionLocked = true;
-                    //往上拖 即下一页
-                    if(deltaY < 0){
-                        this.direction = 'UP';
-                        this.goTo(this.curIndex + 1);
-                        //回调，参数：当前页面索引，下一个页面索引，移动方向
-                        this.$el.trigger('start:' + this.name,[this.curIndex,this.newIndex,this.direction]);
-                        //小于才移动
-                        if(this.newIndex <= this.length){
-                            this.$target = this.$pages.eq(this.newIndex);
-                            this._translate(-this.height);
+                    //如果没限定方向
+                    if(this.options.scroll === 'n'){
+                        if ( this.absDistX > this.absDistY + this.options.directionLockThreshold ){
+                            this.directionLocked = 'h';  //横向
+                        }else{
+                            this.directionLocked = 'v';//竖向
                         }
-
+                    }else if(this.options.scroll === 'h' ){
+                        this.directionLocked = 'h';
                     }else{
-                        //往下滑
-                        this.direction = 'DOWN';
-                        this.goTo(this.curIndex - 1);
-                        //回调，参数：当前页面索引，下一个页面索引，移动方向
-                        this.$el.trigger('start:' + this.name,[this.curIndex,this.newIndex,this.direction]);
-//                        this.newIndex = this.curIndex -1;
+                        this.directionLocked = 'v';//竖向
+                    }
+                    //上下
+                    if(this.directionLocked === 'v'){
+                        //往上拖 即下一页
+                        if(deltaY < 0){
+                            this.direction = 'UP';
+                            this.newIndex = this.curIndex + 1;
+                            //回调，参数：当前页面索引，下一个页面索引，移动方向
+                            //小于才移动
+                            if(this.newIndex <= this.length){
+                                this.$target = this.$pages.eq(this.newIndex);
+                                this._translate(0,-this.height);
+                            }
 
-                        //判定边界值 如果是需要循环的话 则返回上一页
-                        if(this.newIndex >= 0){
-                            this.$target = this.$pages.eq(this.newIndex);
-                            this._translate(-this.height);
+                        }else{
+                            //往下滑
+                            this.direction = 'DOWN';
+                            this.newIndex = this.curIndex - 1;
+                            //判定边界值 如果是需要循环的话 则返回上一页
+                            if(this.newIndex >= 0){
+                                this.$target = this.$pages.eq(this.newIndex);
+                                this._translate(0,-this.height);
+                            }
+
+                        }
+                    }else{
+                        console.log(deltaX,'deltaX');
+                        //左右
+                        //左 上一页
+                        if(deltaX > 0){
+                            this.direction = 'LEFT';
+                            this.newIndex = this.curIndex - 1;
+                            //判定边界值 如果是需要循环的话 则返回上一页
+                            if(this.newIndex >= 0){
+                                this.$target = this.$pages.eq(this.newIndex);
+                                this._translate(-this.width,0);
+                            }
+                        }else{
+                            this.direction = 'RIGHT';
+                            this.newIndex = this.curIndex + 1;
+                            //回调，参数：当前页面索引，下一个页面索引，移动方向
+                            //小于才移动
+                            if(this.newIndex <= this.length){
+                                this.$target = this.$pages.eq(this.newIndex);
+                                this._translate(-this.width,0);
+                            }
                         }
 
                     }
+
+                    this.$el.trigger('start:' + this.name,[this.curIndex,this.newIndex,this.direction]);
                 }
                 //向上拖
 
-                if(this.$target && this.direction === 'UP'){
-                    this._translate(this.height + deltaY);
-                }else if(this.$target && this.direction === 'DOWN'){
-                    this._translate(deltaY -this.height);
+                if(!this.$target) return;
+
+                if(this.direction === 'UP'){
+                    this._translate(0,this.height + deltaY);
+                }else if(this.direction === 'DOWN'){
+                    this._translate(0,deltaY -this.height);
+                }else if(this.direction === 'LEFT'){
+                    this._translate(deltaX -this.width,0);
+                }else if(this.direction === 'RIGHT'){
+                    this._translate(this.width + deltaX,0);
                 }
-
-
 
             },
 
@@ -178,20 +220,38 @@
                 if(this.direction === 'UP'){
                     //不到1/3
                     if(this.height / this.absDistY > 4){
-                        this._scrollTo(this.height);
+                        this._scrollTo(0,this.height);
                         this.change = null;         //
                     }else{
-                        this._scrollTo(0);
+                        this._scrollTo(0,0);
                         this.change = true;         //切换页面
                     }
 
                 }else if(this.direction === 'DOWN'){
                     //不到1/3
                     if(this.height / this.absDistY > 4){
-                        this._scrollTo(-this.height);
+                        this._scrollTo(0,-this.height);
                         this.change = null;         //
                     }else{
-                        this._scrollTo(0);
+                        this._scrollTo(0,0);
+                        this.change = true;         //切换页面
+                    }
+                }else if(this.direction === 'LEFT'){
+                    //不到1/3
+                    if(this.width / this.absDistX > 4){
+                        this._scrollTo(this.width,0);
+                        this.change = null;         //
+                    }else{
+                        this._scrollTo(0,0);
+                        this.change = true;         //切换页面
+                    }
+                }else if(this.direction === 'RIGHT'){
+                    //不到1/3
+                    if(this.width / this.absDistX > 4){
+                        this._scrollTo(-this.width,0);
+                        this.change = null;         //
+                    }else{
+                        this._scrollTo(0,0);
                         this.change = true;         //切换页面
                     }
                 }
@@ -215,28 +275,30 @@
 
             _resize:function(){
                 //重新设置容器高度
+                this.width = this.$el.width();
                 this.height = this.$el.height();
             },
 
             /**
              * CSS3实现滚动到指定的地方
+             * @param x 距离
              * @param y 距离
              * @private
              */
-            _translate: function (y) {
+            _translate: function (x,y) {
                 var me = this;
                 //将上rAF位移
                 rAF(function(){
                     me.$target.addClass('active').css({
-                        '-webkit-transform': 'translate3d(0,'+ y +'px,0)'
+                        '-webkit-transform': 'translate3d('+ x +'px,'+ y +'px,0)'
                     })
                 });
             },
 
-            _scrollTo:function(y, time, easing){
+            _scrollTo:function(x,y, time, easing){
                 time = time || 400;
                 this.$target.css('-webkit-transition','-webkit-transform '+ time +'ms');
-                this._translate(y);
+                this._translate(x,y);
             },
 
             _offTranslate:function(){
@@ -248,7 +310,6 @@
              * @param idx 页面索引
              */
             goTo:function(idx){
-                console.info(this.newIndex,'index')
                 this.newIndex = idx;
             }
 
@@ -286,7 +347,14 @@
      * 插件的默认值
      */
     $.fn.snapscroll.defaults = {
-        loop: false                                //是否循环
+        //方向锁定阈值，比如用户点击屏幕后，滑动5px的距离后，判断用户的拖动意图，是x方向拖动还是y方向
+        directionLockThreshold: 5,
+        //左右滚动h / 上下滚动v /左右上下都可滚动n
+        scroll:'n',
+        //touchend后的惯性动画
+        bounceEasing:'',
+        //是否循环
+        loop: false
     };
 
 })(Zepto,window);

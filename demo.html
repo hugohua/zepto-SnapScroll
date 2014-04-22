@@ -27,11 +27,18 @@
         .section5{background: rosybrown url("img/q2.png") no-repeat;background-size: cover;}
         .show{display: block; z-index: 5}
         .active{display: block; z-index: 10;}
+
+        .loader{position: absolute; top: 0; left: 0; }
     </style>
 </head>
 <body>
+    <!--<div id="J_loader" class="loader">-->
+        <!--加载中....-->
+    <!--</div>-->
     <article id="J_pages" class="pages">
-        <section class="section show section1">section1</section>
+        <section class="section show section1">
+
+        </section>
         <section class="section section2">section2</section>
         <section class="section section3">section3</section>
         <section class="section section4">section4</section>
@@ -39,6 +46,7 @@
     </article>
     <script src="js/zepto.js"></script>
     <script src="js/zepto.snapscroll.js"></script>
+    <!--<script src="js/zepto.ploader.js"></script>-->
     <script>
         var $pages  = $('#J_pages');
         $pages.snapscroll();
@@ -46,8 +54,8 @@
         $pages.on('start:scroll',function(e,curIndex,newIndex,direction){
             console.info('start event',curIndex,newIndex,direction);
         })
-        .on('done:scroll',function(e,data){
-            console.info('done event',data)
+        .on('done:scroll',function(e,newIndex){
+            console.info('done event',newIndex)
         })
     </script>
 </body>
