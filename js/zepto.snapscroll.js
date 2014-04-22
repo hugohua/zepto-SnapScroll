@@ -121,79 +121,39 @@
 
                 var point       = hasTouch ? e.touches[0] : e,
                     deltaX      = point.pageX - this.startX,
-                    deltaY      = point.pageY - this.startY;
+                    deltaY      = point.pageY - this.startY,
+                    x, y,_direction;
                 //绝对值
                 this.absDistX   = Math.abs(deltaX);
                 this.absDistY   = Math.abs(deltaY);
                 //10px用于方向性预测
                 if(this.absDistX < 10 && this.absDistY < 10 ) return;
-
+//                debugger;
                 //第一次移动则锁住 仅执行一次
                 if(!this.directionLocked){
-                    //如果没限定方向
-                    if(this.options.scroll === 'n'){
-                        if ( this.absDistX > this.absDistY + this.options.directionLockThreshold ){
-                            this.directionLocked = 'h';  //横向
-                        }else{
-                            this.directionLocked = 'v';//竖向
-                        }
-                    }else if(this.options.scroll === 'h' ){
-                        this.directionLocked = 'h';
+                    _direction = this.absDistX - this.absDistY - this.options.directionLockThreshold > 0;
+                    if((this.options.scroll === 'n' && _direction) || (this.options.scroll === 'h') ){
+                        this.directionLocked = 'h';  //横向
+                        this.direction = deltaX > 0 ? 'LEFT' : 'RIGHT';
                     }else{
-                        this.directionLocked = 'v';//竖向
+                        this.directionLocked = 'v';  //竖向
+                        this.direction = deltaY > 0 ? 'DOWN' : 'UP';
                     }
-                    //上下
-                    if(this.directionLocked === 'v'){
-                        //往上拖 即下一页
-                        if(deltaY < 0){
-                            this.direction = 'UP';
-                            this.newIndex = this.curIndex + 1;
-                            //回调，参数：当前页面索引，下一个页面索引，移动方向
-                            //小于才移动
-                            if(this.newIndex <= this.length){
-                                this.$target = this.$pages.eq(this.newIndex);
-                                this._translate(0,-this.height);
-                            }
-
-                        }else{
-                            //往下滑
-                            this.direction = 'DOWN';
-                            this.newIndex = this.curIndex - 1;
-                            //判定边界值 如果是需要循环的话 则返回上一页
-                            if(this.newIndex >= 0){
-                                this.$target = this.$pages.eq(this.newIndex);
-                                this._translate(0,-this.height);
-                            }
-
-                        }
+                    //上一页
+                    if(this.direction === 'LEFT' ||this.direction === 'DOWN'){
+                        this.newIndex = this.curIndex - 1;
                     }else{
-                        console.log(deltaX,'deltaX');
-                        //左右
-                        //左 上一页
-                        if(deltaX > 0){
-                            this.direction = 'LEFT';
-                            this.newIndex = this.curIndex - 1;
-                            //判定边界值 如果是需要循环的话 则返回上一页
-                            if(this.newIndex >= 0){
-                                this.$target = this.$pages.eq(this.newIndex);
-                                this._translate(-this.width,0);
-                            }
-                        }else{
-                            this.direction = 'RIGHT';
-                            this.newIndex = this.curIndex + 1;
-                            //回调，参数：当前页面索引，下一个页面索引，移动方向
-                            //小于才移动
-                            if(this.newIndex <= this.length){
-                                this.$target = this.$pages.eq(this.newIndex);
-                                this._translate(-this.width,0);
-                            }
-                        }
-
+                        this.newIndex = this.curIndex + 1;
                     }
+                    this.$target = this.$pages.eq(this.newIndex);
 
+                    //判断是否需要循环
+                    if(this.options.loop){
+                        if(this.newIndex < 0) this.newIndex = this.length;
+                        if(this.newIndex > this.length) this.newIndex = 0;
+                    }
                     this.$el.trigger('start:' + this.name,[this.curIndex,this.newIndex,this.direction]);
                 }
-                //向上拖
 
                 if(!this.$target) return;
 
@@ -352,9 +312,9 @@
         //左右滚动h / 上下滚动v /左右上下都可滚动n
         scroll:'n',
         //touchend后的惯性动画
-        bounceEasing:'',
+//        bounceEasing:'',
         //是否循环
-        loop: false
+        loop: true
     };
 
 })(Zepto,window);
