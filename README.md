@@ -14,8 +14,24 @@ $("#J_pages").snapscroll();
 ```
 同时支持以下参
 ```js
-//是否需要循环，即如果到最后一页，则自动接上第一页
-loop:false/true
+        directionLockThreshold: 5,          //方向锁定阈值，判断用户的拖动意图，是倾向x方向拖动还是y方向
+        scroll:'n',                         //左右滚动h / 上下滚动v /左右上下都可滚动n
+        scrollThreshold:4,                  //百分比，4表示页面的4/1，单位n*100%
+        speed:400,                          //页面滚动速度，单位ms
+        loop: true                          //是否循环
+```
+
+举个栗子，在调用插件时传递对应的参数即可:
+```js
+
+$("#J_pages").snapscroll({
+    directionLockThreshold: 5,          //方向锁定阈值，判断用户的拖动意图，是倾向x方向拖动还是y方向
+    scroll:'v',                         //左右滚动h / 上下滚动v /左右上下都可滚动n
+    scrollThreshold:4,                  //百分比，4表示页面的4/1，单位n*100%
+    speed:400,                          //页面滚动速度，单位ms
+    loop: true                          //是否循环
+});
+
 ```
 
 ##Method
@@ -33,8 +49,8 @@ $("#J_pages").on('start:scroll',function(e,curIndex,newIndex,direction){
 });
 
 //活动结束后触发
-$("#J_pages").on('done:scroll',function(e,data){
-            console.info('done event',data)
+$("#J_pages").on('done:scroll',function(e,newIndex,direction){
+   console.info('done event',newIndex,direction)
 })
 
 ```
@@ -43,6 +59,9 @@ $("#J_pages").on('done:scroll',function(e,data){
 看[DEMO](http://oos.me/zepto-SnapScroll/demo.html)
 
 ## Changelog
+* v0.0.2
+    1. 新增四向滚动
+    2. 修复部分BUG
 * v0.0.1 项目创建
 
 ## Other

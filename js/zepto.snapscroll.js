@@ -145,79 +145,78 @@
                     }else{
                         this.newIndex = this.curIndex + 1;
                     }
-                    this.$target = this.$pages.eq(this.newIndex);
 
                     //判断是否需要循环
                     if(this.options.loop){
                         if(this.newIndex < 0) this.newIndex = this.length;
                         if(this.newIndex > this.length) this.newIndex = 0;
                     }
+                    this.$target = this.$pages.eq(this.newIndex);
                     this.$el.trigger('start:' + this.name,[this.curIndex,this.newIndex,this.direction]);
                 }
 
                 if(!this.$target) return;
 
                 if(this.direction === 'UP'){
-                    this._translate(0,this.height + deltaY);
+                    x = 0;
+                    y = this.height + deltaY;
                 }else if(this.direction === 'DOWN'){
-                    this._translate(0,deltaY -this.height);
+                    x = 0;
+                    y = deltaY -this.height;
                 }else if(this.direction === 'LEFT'){
-                    this._translate(deltaX -this.width,0);
+                    x = deltaX -this.width;
+                    y = 0;
                 }else if(this.direction === 'RIGHT'){
-                    this._translate(this.width + deltaX,0);
+                    x = this.width + deltaX;
+                    y = 0;
                 }
+                this._translate(x,y);
 
             },
 
             _end:function(e){
+                var x =0 ,y = 0,vThreshold,hThreshold;
                 //还原默认状态
                 this.directionLocked = null;
                 this.drag = null;
+                //如果没有移动目标 则直接退出
                 if(!this.$target) return;
                 this.moved = true;
+                this.change = true;
+                //判断距离
+                vThreshold = this.height / this.absDistY > this.options.scrollThreshold;
+                hThreshold = this.width / this.absDistX > this.options.scrollThreshold;
 
                 //4分之1不到的距离就回退
-                if(this.direction === 'UP'){
-                    //不到1/3
-                    if(this.height / this.absDistY > 4){
-                        this._scrollTo(0,this.height);
-                        this.change = null;         //
-                    }else{
-                        this._scrollTo(0,0);
-                        this.change = true;         //切换页面
-                    }
+                if(this.direction === 'UP' && vThreshold){
+                    x = 0;
+                    y = this.height;
+                    this.change = null;
 
-                }else if(this.direction === 'DOWN'){
-                    //不到1/3
-                    if(this.height / this.absDistY > 4){
-                        this._scrollTo(0,-this.height);
-                        this.change = null;         //
-                    }else{
-                        this._scrollTo(0,0);
-                        this.change = true;         //切换页面
-                    }
-                }else if(this.direction === 'LEFT'){
-                    //不到1/3
-                    if(this.width / this.absDistX > 4){
-                        this._scrollTo(this.width,0);
-                        this.change = null;         //
-                    }else{
-                        this._scrollTo(0,0);
-                        this.change = true;         //切换页面
-                    }
-                }else if(this.direction === 'RIGHT'){
-                    //不到1/3
-                    if(this.width / this.absDistX > 4){
-                        this._scrollTo(-this.width,0);
-                        this.change = null;         //
-                    }else{
-                        this._scrollTo(0,0);
-                        this.change = true;         //切换页面
-                    }
+                }else if(this.direction === 'DOWN' && vThreshold){
+                    x = 0;
+                    y = -this.height;
+                    this.change = null;
+
+                }else if(this.direction === 'LEFT' && hThreshold){
+                    x = this.width;
+                    y =0;
+                    this.change = null;
+
+                }else if(this.direction === 'RIGHT' && hThreshold){
+                    x = -this.width;
+                    y = 0;
+                    this.change = null;
                 }
+                this._scrollTo(x,y);
 
             },
 
+            /**
+             * 最后动画停止时调用
+             * @param e
+             * @private
+             */
             _flip:function(e){
                 this._offTranslate();
                 this.directionLocked = null;
@@ -230,7 +229,7 @@
                 this.$target.removeClass('active').removeAttr('style');
                 this.$target = null;
                 this.change = null;
-                this.$el.trigger('done:' + this.name,[this.newIndex]);
+                this.$el.trigger('done:' + this.name,[this.newIndex,this.direction]);
             },
 
             _resize:function(){
@@ -255,9 +254,17 @@
                 });
             },
 
-            _scrollTo:function(x,y, time, easing){
-                time = time || 400;
-                this.$target.css('-webkit-transition','-webkit-transform '+ time +'ms');
+            /**
+             * CSS3滑动距离
+             * @param x
+             * @param y
+             * @param speed
+             * @param easing
+             * @private
+             */
+            _scrollTo:function(x,y, speed, easing){
+                speed = speed || this.options.speed;
+                this.$target.css('-webkit-transition','-webkit-transform '+ speed +'ms');
                 this._translate(x,y);
             },
 
@@ -266,11 +273,19 @@
             },
 
             /**
+             * TODO:尚未完成哈
              * 跳转到指定页面
              * @param idx 页面索引
+             * @param direction 方向 v,h
              */
-            goTo:function(idx){
+            goTo:function(idx,direction){
+                if (this.curIndex==idx || this.isAnimating) return;
                 this.newIndex = idx;
+                this.$target = this.$pages.eq(this.newIndex);
+                //判断方向 v竖向
+                if(this.options.scroll === 'n' && direction === 'v'){
+//                    if()
+                }
             }
 
 
@@ -307,14 +322,11 @@
      * 插件的默认值
      */
     $.fn.snapscroll.defaults = {
-        //方向锁定阈值，比如用户点击屏幕后，滑动5px的距离后，判断用户的拖动意图，是x方向拖动还是y方向
-        directionLockThreshold: 5,
-        //左右滚动h / 上下滚动v /左右上下都可滚动n
-        scroll:'n',
-        //touchend后的惯性动画
-//        bounceEasing:'',
-        //是否循环
-        loop: true
+        directionLockThreshold: 5,          //方向锁定阈值，判断用户的拖动意图，是倾向x方向拖动还是y方向
+        scroll:'n',                         //左右滚动h / 上下滚动v /左右上下都可滚动n
+        scrollThreshold:4,                  //百分比，4表示页面的4/1，单位n*100%
+        speed:400,                          //页面滚动速度，单位ms
+        loop: true                          //是否循环
     };
 
 })(Zepto,window);
