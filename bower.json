@@ -1,0 +1,26 @@
+{
+  "name": "zepto-SnapScroll",
+  "version": "0.0.2",
+  "homepage": "https://github.com/baofen14787/zepto-SnapScroll",
+  "authors": [
+    "hugohua <baofen14787@gmail.com>"
+  ],
+  "description": "页面切换插件",
+  "main": "zepto.snapscroll.js",
+  "keywords": [
+    "zepto",
+    "plugin",
+    "scroll"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "zepto": "~1.1.3"
+  }
+}
