@@ -13,8 +13,6 @@ module.exports = function(grunt){
                     ' * <%= pkg.homepage %>\n' +
                     ' *\n' +
                     ' * Copyright <%= grunt.template.today("yyyy") %>, <%= pkg.author %>\n' +
-                    ' * The iDangero.us\n' +
-                    ' * http://www.idangero.us/\n' +
                     ' *\n' +
                     ' * Licensed under <%= pkg.license.join(" & ") %>\n' +
                     ' *\n' +
