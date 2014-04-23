@@ -14,11 +14,11 @@ $("#J_pages").snapscroll();
 ```
 同时支持以下参
 ```js
-        directionLockThreshold: 5,          //方向锁定阈值，判断用户的拖动意图，是倾向x方向拖动还是y方向
-        scroll:'n',                         //左右滚动h / 上下滚动v /左右上下都可滚动n
-        scrollThreshold:4,                  //百分比，4表示页面的4/1，单位n*100%
-        speed:400,                          //页面滚动速度，单位ms
-        loop: true                          //是否循环
+directionLockThreshold: 5,          //方向锁定阈值，判断用户的拖动意图，是倾向x方向拖动还是y方向
+scroll:'n',                         //左右滚动h / 上下滚动v /左右上下都可滚动n
+scrollThreshold:4,                  //百分比，4表示页面的4/1，单位n*100%
+speed:400,                          //页面滚动速度，单位ms
+loop: true                          //是否循环
 ```
 
 举个栗子，在调用插件时传递对应的参数即可:
