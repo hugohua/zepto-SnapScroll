@@ -1,6 +1,15 @@
 /**
  * Created by admin on 14-4-17.
  */
+(function($){
+    $.fn.anim = function(props, dur, ease){
+        var transforms = [], opacity, k;
+        for (k in props)
+            k === 'opacity' ? opacity=props[k] : transforms.push(k+'('+props[k]+')');
+        return this.css({ '-webkit-transition': 'all '+(dur||0.5)+'s '+(ease||''),
+            '-webkit-transform': transforms.join(' '), opacity: opacity });
+    }
+})(Zepto);
 
 (function ($,window) {
     var rAF = window.requestAnimationFrame  ||
@@ -79,7 +88,9 @@
 
             handleEvent:function(e){
                 switch (e.type){
-                    case 'tap': this._start(e);break;
+                    case 'tap':
+                        this._start(e);
+                        break;
                     case startEvent :
                         this._start(e);
                         break;
@@ -91,10 +102,11 @@
                         this._end(e);
                         break;
                     case 'webkitTransitionEnd':
-                        this._flip();
+                        this._flip(e);
                         break;
                     case resizeEvent:
                         this._resize();
+                        break;
                 }
             },
 
@@ -170,6 +182,9 @@
                     x = this.width + deltaX;
                     y = 0;
                 }
+                //将x，y保存为内部对象用于js动画
+                this.x = x;
+                this.y = y;
                 this._translate(x,y);
 
             },
@@ -177,7 +192,6 @@
             _end:function(e){
                 var x =0 ,y = 0,vThreshold,hThreshold;
                 //还原默认状态
-                this.directionLocked = null;
                 this.drag = null;
                 //如果没有移动目标 则直接退出
                 if(!this.$target) return;
@@ -186,38 +200,39 @@
                 //判断距离
                 vThreshold = this.height / this.absDistY > this.options.scrollThreshold;
                 hThreshold = this.width / this.absDistX > this.options.scrollThreshold;
-
                 //4分之1不到的距离就回退
                 if(this.direction === 'UP' && vThreshold){
                     x = 0;
                     y = this.height;
                     this.change = null;
-
+                    //距离
                 }else if(this.direction === 'DOWN' && vThreshold){
                     x = 0;
                     y = -this.height;
                     this.change = null;
 
                 }else if(this.direction === 'LEFT' && hThreshold){
-                    x = this.width;
+                    x = -this.width;
                     y =0;
                     this.change = null;
 
                 }else if(this.direction === 'RIGHT' && hThreshold){
-                    x = -this.width;
+                    x = this.width;
                     y = 0;
                     this.change = null;
                 }
+                //不管如何 最终还是要回到0点
                 this._scrollTo(x,y);
-
             },
 
             /**
              * 最后动画停止时调用
-             * @param e
              * @private
              */
-            _flip:function(e){
+            _flip:function(){
+                //只有最外层的动画才能执行此回调
+                if(!this.moved) return;
+//                debugger;
                 this._offTranslate();
                 this.directionLocked = null;
                 this.moved = null;
@@ -248,7 +263,7 @@
                 var me = this;
                 //将上rAF位移
                 rAF(function(){
-                    me.$target.addClass('active').css({
+                    me.$target && me.$target.addClass('active').css({
                         '-webkit-transform': 'translate3d('+ x +'px,'+ y +'px,0)'
                     })
                 });
@@ -256,16 +271,82 @@
 
             /**
              * CSS3滑动距离
-             * @param x
-             * @param y
-             * @param speed
+             * @param destX 终点X坐标
+             * @param destY 终点Y坐标
+             * @param time
              * @param easing
              * @private
              */
-            _scrollTo:function(x,y, speed, easing){
-                speed = speed || this.options.speed;
-                this.$target.css('-webkit-transition','-webkit-transform '+ speed +'ms');
-                this._translate(x,y);
+            _scrollTo:function(destX,destY, time, easing){
+                time = time || this.options.speed;
+
+                this.isInTransition = this.options.useTransition && time > 0;
+                if ( this.options.useTransition ) {
+                    this.$target.css('-webkit-transition','-webkit-transform '+ time +'ms');
+                    this._translate(destX,destY);
+                    console.info(this.newIndex)
+//                    debugger;
+                }else{
+                    this._animate(destX,destY,time);
+                }
+            },
+
+            /**
+             * JS动画效果
+             * @param destX 终点X坐标
+             * @param destY 终点Y坐标
+             * @param time 动画执行时间
+             * @param easing
+             * @private
+             */
+            _animate:function(destX,destY, time, easing){
+                var me = this,
+                    distance = (me.directionLocked == 'v') ? destY - me.y : destX - me.x,
+                    speed =  distance/time * 16;
+//                console.info(me.directionLocked)
+//                console.info(speed,distance,time,destY,'speed')
+                //没拖动 直接return
+                if(distance === 0) return;
+                function step(){
+                    //大于0 表示回退
+                    //上下滚动 大于0是往下拖
+                    if(me.directionLocked == 'v' && distance > 0  ){
+                        me.y += speed;
+                        if(me.y > destY) me.y = destY;
+                        me._translate(0,me.y)
+                    }else if(me.directionLocked == 'v' && distance < 0){
+                        me.y += speed;
+                        if(me.y <destY) me.y = destY;
+                        me._translate(0,me.y)
+                    }
+                    else if(me.directionLocked == 'h' && distance > 0){
+
+                        //往坐
+                        me.x += speed;
+                        if(me.x > destX) me.x = destX;
+                        me._translate(me.x,0)
+                    }else if(me.directionLocked == 'h' && distance < 0){
+                        me.x += speed;
+                        if(me.x < destX) me.x = destX;
+                        me._translate(me.x,0)
+                    }
+
+                    //回调 达到 终点后 回调
+                    if((me.directionLocked == 'v' && me.y === destY) || (me.directionLocked == 'h' && me.x === destX)){
+                        me._flip();
+                        //退出循环
+                        return;
+                    }
+                    //递归速度
+                    if( (me.directionLocked == 'v' && distance > 0 && me.y < destY) ||
+                        (me.directionLocked == 'v' && distance < 0 && me.y > destY )||
+                        (me.directionLocked == 'h' && distance < 0 && me.x > destX ) ||
+                        (me.directionLocked == 'h' && distance > 0 && me.x < destX )) {
+                        rAF(step);
+                    }
+
+                }
+                step();
             },
 
             _offTranslate:function(){
@@ -312,7 +393,7 @@
                 instance = $.fn.snapscroll.lookup[$this.data('snapscroll')];
             }
 
-            if (typeof options === 'string') return instance[options].apply(instance,Array.prototype.slice.call(arguments, 1));
+            if (typeof options === 'string') return instance[options].apply(instance,[].slice.call(arguments, 1));
         })
     };
 
@@ -326,7 +407,8 @@
         scroll:'n',                         //左右滚动h / 上下滚动v /左右上下都可滚动n
         scrollThreshold:4,                  //百分比，4表示页面的4/1，单位n*100%
         speed:400,                          //页面滚动速度，单位ms
-        loop: true                          //是否循环
+        loop: true,                          //是否循环
+        useTransition:true                  //是否支持CSS3动画，默认是支持的
     };
 
 })(Zepto,window);

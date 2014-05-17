@@ -1,0 +1,279 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>join us!</title>
+    <style>
+        html{ font-size: 16px; height: 100%;}
+        body,p,h1,h2,div{ margin: 0; padding: 0; font-size: 1em; }
+        ol,ul{list-style: none;}
+        img{border:none;}
+        body{ font-family: Arial; height: 100%; position: relative; max-width: 480px; margin: 0 auto;}
+
+        .pages{position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden}
+        .section{position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; color: #005580; font-size: 20px;}
+        .show{display: block; z-index: 5}
+        .active{display: block; z-index: 10;}
+
+        /*CSS3动画*/
+        @keyframes arrow{
+            0%,30% {opacity: 0;-webkit-transform: rotate(135deg) translate(10px,-10px);}
+            60% {opacity: 0.8;-webkit-transform: rotate(135deg) translate(0,0);}
+            100% {opacity: 0;-webkit-transform: rotate(135deg) translate(-5,5px);}
+        }
+        @-webkit-keyframes arrow{
+            0%,30% {opacity: 0;-webkit-transform: rotate(135deg) translate(10px,-10px);}
+            60% {opacity: 0.8;-webkit-transform: rotate(135deg) translate(0,0);}
+            100% {opacity: 0;-webkit-transform: rotate(135deg) translate(-5px,5px);}
+        }
+        @keyframes light{
+            0%{opacity: 0;}
+            50%{ opacity: 1;}
+            100%{ opacity: 0;}
+        }
+        @-webkit-keyframes light{
+            0%{opacity: 0;}
+            40%,60%{ opacity: 1;}
+            100%{ opacity: 0;}
+        }
+        @keyframes pen{
+            0%{ transform:rotate(10deg);}
+            30%{ transform:rotate(0);}
+            60%{ transform:rotate(-10deg);}
+            100%{ transform:rotate(0);}
+        }
+        @-webkit-keyframes pen{
+            0%{ -webkit-transform:rotate(5deg);}
+            10%{ -webkit-transform:rotate(0);}
+            20%{ -webkit-transform:rotate(-5deg);}
+            35%,75%{-webkit-transform:rotate(0);}
+            80%{ -webkit-transform:rotate(-8deg);}
+            90%{ -webkit-transform:rotate(0deg);}
+            100%{ -webkit-transform:rotate(8deg);}
+        }
+
+        .sec01 .bg{ width: 100%; height: 100%; background: #fff; position: absolute; z-index:;}
+        .sec01 .title{ width: 100%; height: 36%; background: #c42934; position: absolute; bottom: 0; left: 0;}
+        .sec01 .tip{ position: absolute; font-size: 10px; color: #999; top: -20px; left: 20px;}
+        .sec01 .logo{ position: absolute; width: 45px; height: 28px; background: url(http://img2.icson.com/event/2014/05/08/13995176128179.png); background-size: contain; -webkit-background-size:contain; -ms-background-size:contain; left: 20px; top: 20px;}
+        .sec01 img{ display: block;}
+        .arrow{ position: absolute; bottom: 3%; left: 50%; margin-left:-7px; width: 14px; height: 14px; border-left: 2px solid #9d212a; border-bottom: 2px solid #9d212a;  -webkit-animation:arrow infinite 1.5s ease-in-out; z-index: 99;}
+
+        .sec02{ background: #c42934;}
+        .sec02 .b{ font-size: 32px; color: #fff; margin:20px 0 10px 20px;}
+        .sec02 .s{ font-size: 14px; color: rgba(255,255,255,0.5); line-height: 22px; margin: 0 0 0 20px;}
+        .sec02 .fcon{ position: absolute; right: 20px; top: 20px; width: 37px; height: 37px; background: url(http://img2.icson.com/event/2014/05/08/13995175976302.png); background-size: contain; -webkit-background-size:contain; -ms-background-size:contain;}
+        .sec02 .show_wrapper{ position: absolute; width: 100%; height:180px; left: 0; bottom: 9%; padding: 60px 0 60px 0; }
+        .sec02 .you{ width: 180px; height: 180px; line-height: 180px; margin: 0 auto; background: #fff; color: #c7323b; font-size: 52px; font-weight: 900; text-align: center; border-radius: 90px; opacity: 1; position: relative; z-index: 7; }
+        .sec02 .you{ -webkit-transform: scale(0.1) rotate(-360deg); transition:all 0.5s ease-in-out;}
+        .sec02.show .you{ -webkit-transform:scale(1) rotate(0);}
+
+        .sec02 .flybox{ width: 40px; height: 60px; position: absolute; z-index: 6; left: 50%; margin: -20px; top: 46%; }
+        .sec02 .fly1,.sec02 .fly2,.sec02 .fly3,.sec02 .fly4{ position:absolute; -webkit-transform: translate(0,0); transform: translate(0,0); opacity: 0; width: 40px; height: 60px; background: url(http://img2.icson.com/event/2014/05/08/13995176034998.png) no-repeat 0 0; background-size: 135px 120px; -webkit-background-size:135px 120px; -ms-background-size:135px 120px; transition: all 0.5s linear;}
+
+        .sec02 .fly1{ background-position: 0 0; }
+        .sec02 .fly2{ background-position: -45px 0;}
+        .sec02 .fly3{ background-position: 0 -60px; }
+        .sec02 .fly4{ background-position: -90px 0;}
+        .show .fly1{ -webkit-transform: translate(0,-126px); transform: translate(0,-134px); opacity: 1;}
+        .show .fly2{ -webkit-transform: translate(116px,0); transform: translate(120px,0); opacity: 1;}
+        .show .fly3{ -webkit-transform: translate(0,126px); transform: translate(0,136px); opacity: 1;}
+        .show .fly4{ -webkit-transform: translate(-122px,0); transform: translate(-127px,0); opacity: 1;}
+
+        .bc{ width: 85px; height: 85px; border: 3px solid #c42934; border-radius: 44px; background: url(http://img2.icson.com/event/2014/05/08/13995175948468.png) no-repeat 0 0 #fff; background-size: 425px 85px; -webkit-background-size:425px 85px; -ms-background-size:425px 85px; position: relative; margin: 14% auto 0 auto; z-index: 15; }
+        .sec04 .bc{ background-position: -85px 0;}
+        .sec05 .bc{ background: #fff;}
+        .sec05 .bc .bc_in{ width: 85px; height: 85px; background: url(http://img2.icson.com/event/2014/05/08/13995175948468.png) no-repeat -170px 0; background-size: 425px 85px; -webkit-background-size:425px 85px; -ms-background-size:425px 85px; -webkit-animation:pen infinite 1.5s ease-in-out; position: absolute;}
+        .sec06 .bc.on{ background-position: -255px 0;}
+        .sec06 .bc{ background-position: -340px 0;}
+
+        .sec04 .eye{ width: 7px; height: 7px; background: #fff; border-radius: 4px; position: absolute; z-index: 20; left: 50%; top: 50%; margin:-7px 0 0 -7px;}
+
+        .sec03 .light{ width: 85px; height: 85px; position: absolute; background: url(http://img2.icson.com/event/2014/05/08/13995176096510.png); background-size: contain; -webkit-background-size:contain; -ms-background-size:contain; -webkit-animation:light infinite 4s ease-in-out; animation:light infinite 4s ease-in-out;}
+        .tag{ font-size: 16px; line-height:28px; padding:0 12px;  color: #fff; background: #c42934; border: 2px solid #fff; float: left;  position: relative; left: 50%; margin-left: -120px; top: -28px; white-space: nowrap; }
+        .sec04 .tag,.sec06 .tag{ margin-left: 10px;}
+
+        .tag .triangle{ position: absolute; right: -2px; bottom:-12px; width: 0; height: 0; font-size: 0; border:6px solid #fff; border-left-color: transparent; border-bottom-color:transparent; }
+        .tag .triangle::after{ content:"";position: absolute; right: -4px; bottom: -2px; width: 0; height: 0; font-size: 0; border:4px solid #c42934; border-left-color:transparent;border-bottom-color:transparent;}
+
+        .sec04 .tag .triangle,.sec06 .tag .triangle{ left: -2px; bottom:-12px;border:6px solid #fff; border-right-color: transparent; border-bottom-color:transparent;}
+        .sec04 .tag .triangle::after,.sec06 .tag .triangle::after{ content:""; right: -4px; bottom: -2px; border:4px solid #c42934; border-right-color:transparent;border-bottom-color:transparent;}
+
+        .line{ width: 1px; height: 100%; position: absolute; left: 50%; background: #c0c0c0;}
+        .sec04 .line,.sec05 .line,.sec06 .line{ top: 0;}
+        .sec06 .line{ height: 80%;}
+
+        .circle{ width:8px; height: 8px; background: #c0c0c0; border-radius: 4px; position: absolute; left: 50%; margin-left: -4px; top:30%;}
+        .c2{ top: 40%}
+        .c3{ top: 50%}
+        .c4{ top: 60%}
+        .c5{ top: 70%}
+        .c6{ top: 80%}
+
+        .info_r,.info_l{ color: #676767; width: 120px; line-height: 1.1;}
+        .sec04 .info_r,.sec04 .info_l{ width: 130px;}
+        .sec05 .info_r,.sec05 .info_l{ width: 135px;}
+        .sec06 .info_l{ width: 133px; text-align: right;}
+
+        .info_r::after{ content: ""; width:8px; height: 8px; background: #c0c0c0; border-radius: 4px; position: absolute; left: -16px; margin-left: -4px; top:50%; margin-top: -4px;}
+        .info_l::after{ content:""; width: 8px; height: 8px; background: #c0c0c0; border-radius: 4px; position: absolute; right: -10px; margin-right: -4px; top: 50%; margin-top: -4px;}
+        .r1{ position: absolute; top: 30%; left: 50%; margin-left: 16px; -webkit-transition:all 0.8s linear;}
+        .l1{ position: absolute; top: 40%; right: 50%; margin-right: 10px; -webkit-transition:all 0.7s linear;}
+        .r2{ position: absolute; top: 50%; left: 50%; margin-left: 16px; -webkit-transition:all 0.6s linear;}
+        .l2{ position: absolute; top: 60%; right: 50%; margin-right: 10px; -webkit-transition:all 0.5s linear;}
+        .r3{ position: absolute; top: 70%; left: 50%; margin-left: 16px; -webkit-transition:all 0.4s linear;}
+
+        .show .r1,.show .l1,.show .r2,.show .l2,.show .r3{ -webkit-transform:translate(0,0); opacity: 1;}
+        .r1,.l1,.r2,.l2,.r3{ -webkit-transform:translate(0,40px); opacity: 0; }
+
+        .sc{ width: 41px; height: 41px; position: absolute; background: url(http://img2.icson.com/event/2014/05/08/13995176185274.png) no-repeat 0 0; background-size: 123px 41px; -webkit-background-size: 123px 41px; -ms-background-size:123px 41px; left: 50%; margin-left: -20px; top: 80%; z-index: 11;}
+        .sec04 .sc{ background-position: -41px 0;}
+        .sec05 .sc{ background-position: -82px 0;}
+
+
+        .sec06 .slo{ font-size: 32px; position: absolute; width: 100%; text-align: center; bottom: 10%; color: #676767;}
+
+        .sec07{ background: #c7323b; color: #fff; display: -webkit-box;
+            -webkit-box-orient: horizontal;
+            -webkit-box-pack: center;
+            -webkit-box-align: center;}
+        .photobox{ width: 230px; margin: 15px auto 0 auto;}
+        .photobox .ti{ margin-bottom: 7px; font-size: 13px;}
+        .sec07 .s{ font-size: 14px; text-align: center;}
+        .sec07 .email{ font-size: 18px; text-align: center;}
+        .micon{ width: 48px; height: 30px; background: url(http://img2.icson.com/event/2014/05/08/13995176154306.png); background-size: contain; -webkit-background-size:contain; -ms-background-size:contain; margin: 0 auto 10px auto;}
+
+        .sec03,.sec04,.sec05,.sec06{background: #fff;}
+        .end{position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; line-height: 40px; text-align: center }
+    </style>
+</head>
+<body>
+<article id="J_pages" class="pages">
+    <!--第一屏 S-->
+    <section class="section show sec01">
+        <div class="bg">
+            <img src="http://img2.icson.com/event/2014/05/12/13998852584036.png" width="100%">
+        </div>
+        <div class="title">
+            <img src="http://img2.icson.com/event/2014/05/16/14002105287157.png" width="100%">
+        </div>
+        <div class="arrow"></div>
+    </section>
+    <!--第一屏 E-->
+
+    <!-- 第二屏 S-->
+    <section class="section sec02 section2">
+        <p class="b">我们希望你</p>
+        <p class="s">热爱电子商务营销</p>
+        <p class="s">致力于无线互联网产品体验优化</p>
+        <p class="s">对数据可视化和效率平台设计感兴趣</p>
+        <p class="s">富有激情 积极主动 合作沟通 关注细节</p>
+        <div class="fcon"></div>
+        <div class="show_wrapper">
+            <div class="you">YOU!</div>
+            <div class="flybox">
+                <div class="fly fly1"></div>
+                <div class="fly fly2"></div>
+                <div class="fly fly3"></div>
+                <div class="fly fly4"></div>
+            </div>
+        </div>
+        <div class="arrow"></div>
+    </section>
+    <!-- 第二屏 E-->
+
+    <!-- 第三屏 S-->
+    <section class="section sec05">
+        <div class="bc">
+            <div class="bc_in"></div>
+            <div class="tag">前端工程师<i class="triangle"></i></div>
+        </div>
+        <div class="line"></div>
+        <div class="arrow"></div>
+        <p class="info_r r1">精通html&amp;css技术</p>
+        <p class="info_l l1">代码风格严谨工整高保真还原设计稿</p>
+        <p class="info_r r2">有Javascript和jQuery的相关经验</p>
+        <p class="info_l l2">对于网页性能优化有所涉猎</p>
+        <p class="info_r r3">有APP开发经验者优先</p>
+        <div class="sc"></div>
+    </section>
+    <!-- 第三屏 E-->
+
+    <!-- 第三屏 E-->
+    <section class="section sec03">
+        <div class="bc">
+            <div class="light"></div>
+            <div class="tag">交互设计师<i class="triangle"></i></div>
+        </div>
+        <div class="line"></div>
+        <div class="arrow"></div>
+        <p class="info_r r1">全面的信息架构</p>
+        <p class="info_l l1">洞察多目标群体需求，萃取设计机会点</p>
+        <p class="info_r r2">故事版,线框图和交互原型迭代</p>
+        <p class="info_l l2">无缝的任务流程</p>
+        <p class="info_r r3">关注移动互联网交互趋势</p>
+        <div class="sc"></div>
+    </section>
+
+    <!-- 第四屏 S-->
+    <section class="section sec04">
+        <div class="bc">
+            <div class="tag">视觉设计师<i class="triangle"></i></div>
+            <i class="eye"></i>
+        </div>
+        <div class="line"></div>
+        <div class="arrow"></div>
+        <p class="info_r r1">平衡设计美学、趋势与目标用户偏好</p>
+        <p class="info_l l1">视觉创意和表现力</p>
+        <p class="info_r r2">追求像素完美</p>
+        <p class="info_l l2">色彩搭配、质感表现、排版布局、字体设计等视觉规范</p>
+        <p class="info_r r3">融合设计形式与内容</p>
+        <div class="sc"></div>
+    </section>
+    <!-- 第四屏 E-->
+
+    <!-- 第五屏 S-->
+    <section class="section sec06">
+        <div class="bc on">
+            <div class="tag">用户研究员<i class="triangle"></i></div>
+        </div>
+        <div class="line"></div>
+        <div class="arrow"></div>
+        <p class="info_r r1">数据分析</p>
+        <p class="info_l l1">定性定量研究方法</p>
+        <p class="info_r r2">用户剖画和行为模式构建</p>
+        <p class="info_l l2">可用性评估</p>
+        <p class="info_r r3">分析和洞察用户需求实质</p>
+        <div class="slo">Join us!!!</div>
+    </section>
+    <!-- 第五屏 E-->
+
+    <!-- 第五屏 S-->
+    <section class="section sec07">
+        <div class="container">
+            <div class="micon"></div>
+            <p class="s">发送简历及作品到</p>
+            <p class="email">zhaopin_ued@jd.com</p>
+        </div>
+        <div class="end"> End </div>
+    </section>
+</article>
+<script src="bower_components/zepto/zepto.min.js"></script>
+<script src="zepto.snapscroll.min.js"></script>
+<script>
+    var $pages  = $('#J_pages');
+    $pages.snapscroll();
+
+    $pages.on('start:scroll',function(e,curIndex,newIndex,direction){
+        console.info('start',curIndex,newIndex,direction);
+    })
+    .on('done:scroll',function(e,newIndex,direction){
+        console.info('done event',newIndex,direction)
+    });
+</script>
+</body>
+</html>
