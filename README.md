@@ -58,8 +58,13 @@ $("#J_pages").on('done:scroll',function(e,newIndex,direction){
 ```
 
 ##DEMO
-看[DEMO](http://oos.me/zepto-SnapScroll/demo.html)
+[DEMO1](http://oos.me/zepto-SnapScroll/demo.html)
 
+![demo1](https://baofen14787.github.com/zepto-SnapScroll/demo1.png)
+
+[DEMO2](http://oos.me/zepto-SnapScroll/demo_jd_job.html)
+
+![demo2](https://baofen14787.github.com/zepto-SnapScroll/demo2.png)
 ## Changelog
 * v0.1.0
     1. 修复左右滑动时，滑动距离小于翻页闸值时的bug
