@@ -52,7 +52,9 @@
     <script src="zepto.snapscroll.js"></script>
     <script>
         var $pages  = $('#J_pages');
-        $pages.snapscroll();
+        $pages.snapscroll({
+            scroll:'v'
+        });
 
         $pages.on('start:scroll',function(e,curIndex,newIndex,direction){
             console.info('start',curIndex,newIndex,direction);

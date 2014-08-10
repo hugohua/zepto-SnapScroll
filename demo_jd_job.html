@@ -266,7 +266,9 @@
 <script src="zepto.snapscroll.min.js"></script>
 <script>
     var $pages  = $('#J_pages');
-    $pages.snapscroll();
+    $pages.snapscroll({
+        scrollThreshold:10
+    });
 
     $pages.on('start:scroll',function(e,curIndex,newIndex,direction){
         console.info('start',curIndex,newIndex,direction);

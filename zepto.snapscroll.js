@@ -19,12 +19,16 @@
         window.msRequestAnimationFrame      ||
         function (callback) { window.setTimeout(callback, 1000 / 60); };
 
+    //事件名称统一处理
     var hasTouch = 'ontouchstart' in window,
         resizeEvent = 'onorientationchange' in window ? 'orientationchange' : 'resize',
         startEvent = hasTouch ? 'touchstart' : 'mousedown',
         moveEvent = hasTouch ? 'touchmove' : 'mousemove',
         endEvent = hasTouch ? 'touchend' : 'mouseup',
-        cancelEvent = hasTouch ? 'touchcancel' : 'mouseup';
+        cancelEvent = hasTouch ? 'touchcancel' : 'mouseup',
+        transitionEnd = 'webkitTransitionEnd';
+
+//    var direction
 
     /**
      * 定义一个插件 Plugin
@@ -41,18 +45,13 @@
         }
 
 
-        /**
-         * 写法二
-         * 将插件所有函数放在prototype的大对象里
-         * @type {{}}
-         */
         SnapScroll.prototype = {
             //将构造函数的指向重新定位到Plugin
             constructor:SnapScroll,
 
-            name:'scroll',
+            name:'SnapScroll',
 
-            version:'0.0.2',
+            version:'0.0.3',
 
             init:function(){
 
@@ -82,12 +81,17 @@
                         .on(moveEvent, $.proxy(this.handleEvent, this))
                         .on(endEvent, $.proxy(this.handleEvent, this))
                         .on(cancelEvent, $.proxy(this.handleEvent, this));
-                this.$pages.on('webkitTransitionEnd', $.proxy(this.handleEvent, this));
+                this.$pages.on(transitionEnd, $.proxy(this.handleEvent, this));
                 window.addEventListener(resizeEvent, this, false)
             },
 
+            /**
+             * 统一的事件处理函数
+             * @param e
+             */
             handleEvent:function(e){
                 switch (e.type){
+                    //tap事件 进行初始化工作
                     case 'tap':
                         this._start(e);
                         break;
@@ -101,7 +105,7 @@
                     case cancelEvent:
                         this._end(e);
                         break;
-                    case 'webkitTransitionEnd':
+                    case transitionEnd:
                         this._flip(e);
                         break;
                     case resizeEvent:
@@ -110,11 +114,16 @@
                 }
             },
 
+            /**
+             * 开始移动
+             * @param e
+             * @private
+             */
             _start:function(e){
                 //如果正在移动状态则返回
                 if(this.moved) return;
                 var point = hasTouch ? e.touches[0] : e;
-                this.startTime = Date.now();
+//                this.startTime = Date.now();
                 this.drag      = true;
                 this.startX    = point.pageX;
                 this.startY    = point.pageY;       //start Y
@@ -126,103 +135,108 @@
              * @private
              */
             _move: function (e) {
+                var me = this;
+                //阻止冒泡及本身行为
                 e.preventDefault();
                 e.stopPropagation();
                 //如果正在移动状态 或者 不处于拖曳状态 则返回
-                if(this.moved || !this.drag) return;
+                if(me.moved || !me.drag) return;
 
                 var point       = hasTouch ? e.touches[0] : e,
-                    deltaX      = point.pageX - this.startX,
-                    deltaY      = point.pageY - this.startY,
+                    deltaX      = point.pageX - me.startX,
+                    deltaY      = point.pageY - me.startY,
                     x, y,_direction;
                 //绝对值
-                this.absDistX   = Math.abs(deltaX);
-                this.absDistY   = Math.abs(deltaY);
+                me.absDistX   = Math.abs(deltaX);
+                me.absDistY   = Math.abs(deltaY);
                 //10px用于方向性预测
-                if(this.absDistX < 10 && this.absDistY < 10 ) return;
+                if(me.absDistX < 10 && me.absDistY < 10 ) return;
 //                debugger;
                 //第一次移动则锁住 仅执行一次
-                if(!this.directionLocked){
-                    _direction = this.absDistX - this.absDistY - this.options.directionLockThreshold > 0;
-                    if((this.options.scroll === 'n' && _direction) || (this.options.scroll === 'h') ){
-                        this.directionLocked = 'h';  //横向
-                        this.direction = deltaX > 0 ? 'LEFT' : 'RIGHT';
+                if(!me.directionLocked){
+                    //判定拖曳方向
+                    _direction = me.absDistX - me.absDistY - me.options.directionLockThreshold > 0;
+                    if((me.options.scroll === 'n' && _direction) || (me.options.scroll === 'h') ){
+                        me.directionLocked = 'h';  //横向
+                        me.direction = deltaX > 0 ? 'LEFT' : 'RIGHT';
                     }else{
-                        this.directionLocked = 'v';  //竖向
-                        this.direction = deltaY > 0 ? 'DOWN' : 'UP';
+                        me.directionLocked = 'v';  //竖向
+                        me.direction = deltaY > 0 ? 'DOWN' : 'UP';
                     }
                     //上一页
-                    if(this.direction === 'LEFT' ||this.direction === 'DOWN'){
-                        this.newIndex = this.curIndex - 1;
+                    if(me.direction === 'LEFT' ||me.direction === 'DOWN'){
+                        me.newIndex = me.curIndex - 1;
                     }else{
-                        this.newIndex = this.curIndex + 1;
+                        me.newIndex = me.curIndex + 1;
                     }
 
                     //判断是否需要循环
-                    if(this.options.loop){
-                        if(this.newIndex < 0) this.newIndex = this.length;
-                        if(this.newIndex > this.length) this.newIndex = 0;
+                    if(me.options.loop){
+                        if(me.newIndex < 0) me.newIndex = me.length;
+                        if(me.newIndex > me.length) me.newIndex = 0;
                     }
-                    this.$target = this.$pages.eq(this.newIndex);
-                    this.$el.trigger('start:' + this.name,[this.curIndex,this.newIndex,this.direction]);
+                    //当前页面
+                    me.$target = me.$pages.eq(me.newIndex);
+                    me.$el.trigger('start:' + me.name,[me.curIndex,me.newIndex,me.direction]);
                 }
 
-                if(!this.$target) return;
+                //假设万一target不存在 则返回
+                if(!me.$target) return;
 
-                if(this.direction === 'UP'){
+                if(me.direction === 'UP'){
                     x = 0;
-                    y = this.height + deltaY;
-                }else if(this.direction === 'DOWN'){
+                    y = me.height + deltaY;
+                }else if(me.direction === 'DOWN'){
                     x = 0;
-                    y = deltaY -this.height;
-                }else if(this.direction === 'LEFT'){
-                    x = deltaX -this.width;
+                    y = deltaY -me.height;
+                }else if(me.direction === 'LEFT'){
+                    x = deltaX -me.width;
                     y = 0;
-                }else if(this.direction === 'RIGHT'){
-                    x = this.width + deltaX;
+                }else if(me.direction === 'RIGHT'){
+                    x = me.width + deltaX;
                     y = 0;
                 }
                 //将x，y保存为内部对象用于js动画
-                this.x = x;
-                this.y = y;
-                this._translate(x,y);
+                me.x = x;
+                me.y = y;
+                me._translate(x,y);
 
             },
 
             _end:function(e){
-                var x =0 ,y = 0,vThreshold,hThreshold;
+                var x =0 ,y = 0,vThreshold,hThreshold,me = this;
                 //还原默认状态
-                this.drag = null;
+                me.drag = null;
                 //如果没有移动目标 则直接退出
-                if(!this.$target) return;
-                this.moved = true;
-                this.change = true;
+                if(!me.$target) return;
+                me.moved = true;
+                me.change = true;
                 //判断距离
-                vThreshold = this.height / this.absDistY > this.options.scrollThreshold;
-                hThreshold = this.width / this.absDistX > this.options.scrollThreshold;
+                vThreshold = me.height / me.absDistY > me.options.scrollThreshold;
+                hThreshold = me.width / me.absDistX > me.options.scrollThreshold;
                 //4分之1不到的距离就回退
-                if(this.direction === 'UP' && vThreshold){
+                if(me.direction === 'UP' && vThreshold){
                     x = 0;
-                    y = this.height;
-                    this.change = null;
+                    y = me.height;
+                    me.change = null;
                     //距离
-                }else if(this.direction === 'DOWN' && vThreshold){
+                }else if(me.direction === 'DOWN' && vThreshold){
                     x = 0;
-                    y = -this.height;
-                    this.change = null;
+                    y = -me.height;
+                    me.change = null;
 
-                }else if(this.direction === 'LEFT' && hThreshold){
-                    x = -this.width;
+                }else if(me.direction === 'LEFT' && hThreshold){
+                    x = -me.width;
                     y =0;
-                    this.change = null;
+                    me.change = null;
 
-                }else if(this.direction === 'RIGHT' && hThreshold){
-                    x = this.width;
+                }else if(me.direction === 'RIGHT' && hThreshold){
+                    x = me.width;
                     y = 0;
-                    this.change = null;
+                    me.change = null;
                 }
                 //不管如何 最终还是要回到0点
-                this._scrollTo(x,y);
+                me._scrollTo(x,y);
             },
 
             /**
@@ -280,11 +294,12 @@
             _scrollTo:function(destX,destY, time, easing){
                 time = time || this.options.speed;
 
-                this.isInTransition = this.options.useTransition && time > 0;
+//                this.isInTransition = this.options.useTransition && time > 0;
+                //如果支持CSS3动画
                 if ( this.options.useTransition ) {
                     this.$target.css('-webkit-transition','-webkit-transform '+ time +'ms');
                     this._translate(destX,destY);
-                    console.info(this.newIndex)
+//                    console.info(this.newIndex)
 //                    debugger;
                 }else{
                     this._animate(destX,destY,time);
@@ -405,7 +420,7 @@
     $.fn.snapscroll.defaults = {
         directionLockThreshold: 5,          //方向锁定阈值，判断用户的拖动意图，是倾向x方向拖动还是y方向
         scroll:'n',                         //左右滚动h / 上下滚动v /左右上下都可滚动n
-        scrollThreshold:4,                  //百分比，4表示页面的4/1，单位n*100%
+        scrollThreshold:10,                  //百分比，10表示页面的10/1，单位n*100%
         speed:400,                          //页面滚动速度，单位ms
         loop: true,                          //是否循环
         useTransition:true                  //是否支持CSS3动画，默认是支持的
