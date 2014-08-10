@@ -217,7 +217,7 @@
                 me.drag = null;
                 //如果不是循环
                 if(!me.options.loop){
-                    console.log(me.newIndex , me.length,me.moved,me.drag);
+//                    console.log(me.newIndex , me.length,me.moved,me.drag);
                     me.directionLocked = null;
                     if(me.newIndex < 0) me.newIndex = 0;
                     if(me.newIndex > me.length) me.newIndex = me.length;
