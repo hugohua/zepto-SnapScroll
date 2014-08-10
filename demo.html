@@ -25,11 +25,19 @@
         .section3{background: #eae7d5 url("img/q2.png") no-repeat;background-size: cover;}
         .section4{background: #cceecc url("img/q4.png") no-repeat;background-size: cover;}
         .section5{background: rosybrown url("img/q2.png") no-repeat;background-size: cover;}
-        .show{display: block; z-index: 5}
-        .active{display: block; z-index: 10;}
+
 
         .action{position: fixed; top: 0; left: 0; width: 100%; height: 50px; line-height:50px; background: #008200; z-index: 10; }
         .action a{background: #fff; padding:5px 20px;}
+
+        .spage{position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden}
+        .part{position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; color: #fff;}
+        .part1{background: #005580}
+        .part2{background: #008200}
+        .part3{background: #2D3642}
+
+        .show{display: block; z-index: 5}
+        .active{display: block; z-index: 10;}
     </style>
 </head>
 <body>
@@ -38,7 +46,19 @@
     <!--</div>-->
     <article id="J_pages" class="pages">
         <section class="section show section1">section1</section>
-        <section class="section section2">section2</section>
+        <section class="section section2">
+            <div id="J_spage" class="spage">
+                <div class="part part1 show">
+                    p1
+                </div>
+                <div class="part part2">
+                    p2
+                </div>
+                <div class="part part3">
+                    p3
+                </div>
+            </div>
+        </section>
         <section class="section section3">section3</section>
         <section class="section section4">section4</section>
         <section class="section section5">section5</section>
@@ -53,8 +73,14 @@
     <script>
         var $pages  = $('#J_pages');
         $pages.snapscroll({
-            scroll:'v'
+            scroll:'v',
+            loop: false
         });
+
+//        $('#J_spage').snapscroll({
+//            scroll:'h',
+//            loop: false
+//        });
 
         $pages.on('start:scroll',function(e,curIndex,newIndex,direction){
             console.info('start',curIndex,newIndex,direction);

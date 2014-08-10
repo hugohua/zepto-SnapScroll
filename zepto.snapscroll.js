@@ -51,14 +51,13 @@
 
             name:'SnapScroll',
 
-            version:'0.0.3',
+            version:'0.1.1',
 
             init:function(){
 
                 this.$pages             = this.$el.children();              //所有页面zepto对象
                 this.length             = this.$pages.length -1;            //页面个数
-                this.width              = this.$el.width();
-                this.height             = this.$el.height();                //容器高度
+
                 this.curIndex           = 0;                                //当前展示页面
                 this.newIndex           = 0;                                //需要切换到下一页的索引
                 this.startTime          = null;                             //开始时间
@@ -69,7 +68,6 @@
                 this.$target            = null;                             //确定拖动的目标
 
                 this._initEvent();
-                console.log('init');
             },
 
             /**
@@ -123,8 +121,10 @@
                 //如果正在移动状态则返回
                 if(this.moved) return;
                 var point = hasTouch ? e.touches[0] : e;
-//                this.startTime = Date.now();
+                //若多个实例，有实例默认是隐藏状态，则需要在tap时重新获取宽高
+                this._resize();
                 this.drag      = true;
+                //记录点击时的坐标
                 this.startX    = point.pageX;
                 this.startY    = point.pageY;       //start Y
             },
@@ -143,10 +143,11 @@
                 if(me.moved || !me.drag) return;
 
                 var point       = hasTouch ? e.touches[0] : e,
+                    //记录拖曳的距离
                     deltaX      = point.pageX - me.startX,
                     deltaY      = point.pageY - me.startY,
                     x, y,_direction;
-                //绝对值
+                //记录拖曳的绝对值距离
                 me.absDistX   = Math.abs(deltaX);
                 me.absDistY   = Math.abs(deltaY);
                 //10px用于方向性预测
@@ -167,6 +168,7 @@
                     if(me.direction === 'LEFT' ||me.direction === 'DOWN'){
                         me.newIndex = me.curIndex - 1;
                     }else{
+                        //下一页
                         me.newIndex = me.curIndex + 1;
                     }
 
@@ -174,12 +176,14 @@
                     if(me.options.loop){
                         if(me.newIndex < 0) me.newIndex = me.length;
                         if(me.newIndex > me.length) me.newIndex = 0;
+                    }else{
+                        if(me.newIndex < 0 || me.newIndex > me.length) return;
                     }
+
                     //当前页面
                     me.$target = me.$pages.eq(me.newIndex);
                     me.$el.trigger('start:' + me.name,[me.curIndex,me.newIndex,me.direction]);
                 }
-
                 //假设万一target不存在 则返回
                 if(!me.$target) return;
 
@@ -200,17 +204,30 @@
                 me.x = x;
                 me.y = y;
                 me._translate(x,y);
-
             },
 
+            /**
+             * 离开屏幕事件
+             * @param e
+             * @private
+             */
             _end:function(e){
                 var x =0 ,y = 0,vThreshold,hThreshold,me = this;
                 //还原默认状态
                 me.drag = null;
+                //如果不是循环
+                if(!me.options.loop){
+                    console.log(me.newIndex , me.length,me.moved,me.drag);
+                    me.directionLocked = null;
+                    if(me.newIndex < 0) me.newIndex = 0;
+                    if(me.newIndex > me.length) me.newIndex = me.length;
+                }
                 //如果没有移动目标 则直接退出
-                if(!me.$target) return;
+                if(!me.$target || !me.$target.length) return;
+
                 me.moved = true;
                 me.change = true;
+
                 //判断距离
                 vThreshold = me.height / me.absDistY > me.options.scrollThreshold;
                 hThreshold = me.width / me.absDistX > me.options.scrollThreshold;
